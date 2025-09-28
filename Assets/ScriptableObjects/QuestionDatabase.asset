@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6cf0d6bd743c994388c0d9dfa609daf, type: 3}
+  m_Name: QuestionDatabase
+  m_EditorClassIdentifier: 
+  m_QuestionDatas:
+  - questionKind:
+      difficult: 3
+      isCentral: 1
+      isPacific: 0
+    question:
+      Sentence: "2025\u5E74\u306E\u30BB\u30FB\u30EA\u30FC\u30B0\u512A\u52DD\u30C1\u30FC\u30E0\u306F\uFF1F"
+      CorrectChoice: "\u962A\u795E\u30BF\u30A4\u30AC\u30FC\u30B9"
+      InCorrectChoice:
+      - "\u8AAD\u58F2\u30B8\u30E3\u30A4\u30A2\u30F3\u30C4"
+      - "\u6A2A\u6D5CDeNA\u30D9\u30A4\u30B9\u30BF\u30FC\u30BA"
+      - "\u5E83\u5CF6\u6771\u6D0B\u30AB\u30FC\u30D7"
