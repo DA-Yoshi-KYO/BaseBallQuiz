@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 317dcaab409264d4781d9ecd1efa11cd
+timeCreated: 1444149502
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18355
+  packageName: 2D Baseball Pack
+  packageVersion: 3.0.0
+  assetPath: Assets/catch_game_assets_volume2/animations/glove_1_3.anim
+  uploadId: 271877

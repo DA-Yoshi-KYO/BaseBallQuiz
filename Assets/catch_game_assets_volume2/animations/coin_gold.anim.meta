@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e76ca864fd5e4432fbfec98d7674e20a
+timeCreated: 1444051118
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18355
+  packageName: 2D Baseball Pack
+  packageVersion: 3.0.0
+  assetPath: Assets/catch_game_assets_volume2/animations/coin_gold.anim
+  uploadId: 271877

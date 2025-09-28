@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 69479f1eb8e804bdd9110c71344387f7
+timeCreated: 1444051407
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18355
+  packageName: 2D Baseball Pack
+  packageVersion: 3.0.0
+  assetPath: Assets/catch_game_assets_volume2/animations/coin_silver.controller
+  uploadId: 271877

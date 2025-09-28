@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 873881d11370047f8b690b67d84cedef
+timeCreated: 1444053430
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18355
+  packageName: 2D Baseball Pack
+  packageVersion: 3.0.0
+  assetPath: Assets/catch_game_assets_volume2/animations/hex_bronze.anim
+  uploadId: 271877

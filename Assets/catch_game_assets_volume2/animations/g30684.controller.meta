@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 40188fe5d1507401a9fb9b0987c6bee0
+timeCreated: 1444056807
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18355
+  packageName: 2D Baseball Pack
+  packageVersion: 3.0.0
+  assetPath: Assets/catch_game_assets_volume2/animations/g30684.controller
+  uploadId: 271877
