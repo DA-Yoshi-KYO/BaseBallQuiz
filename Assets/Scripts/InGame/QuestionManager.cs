@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Drawing;
 using TMPro;
@@ -12,6 +13,7 @@ public class QuestionManager : MonoBehaviour
     [Header("問題が格納されているデータベース")]
     private QuestionDatabase dataBase;  // 問題のデータベース
     private QuestionData m_QuestionData;    // 出題する問題のデータ
+    private QuestionKind m_eQuestionKind;   // 出題するジャンル
 
     private GameObject m_Sentence;  // 問題文
     private GameObject[] m_Choices = new GameObject[4]; // 選択肢
@@ -38,6 +40,13 @@ public class QuestionManager : MonoBehaviour
     };
     GamePhase m_ePhase = GamePhase.KindSelect;
 
+    // ジャンル名
+    string[] m_sKindName =
+    {
+        "セ・リーグ",
+        "パ・リーグ"
+    };
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -55,6 +64,19 @@ public class QuestionManager : MonoBehaviour
             m_KindSelectButton[i] = GameObject.Find("SelectButton" + index);
         }
 
+        // ジャンル別問題数 のデバッグ表示
+        int[] questionNum = new int[(int)QuestionKind.Max];
+        for (int i = 0; i < dataBase.m_QuestionDatas.Length; i++)
+        {
+            questionNum[(int)dataBase.m_QuestionDatas[i].questionKind]++;
+        }
+        Debug.Log("ジャンル別問題数");
+        for (int i = 0; i < (int)QuestionKind.Max; i++)
+        {
+            Debug.Log((QuestionKind)i + "：" + questionNum[i]);
+        }
+
+        // トランスフォームの初期化
         m_Ball.GetComponent<RectTransform>().sizeDelta = Vector2.zero;
         m_KindSelect.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
         m_Question.GetComponent<RectTransform>().anchoredPosition = new Vector2(1200, -390);
@@ -64,6 +86,8 @@ public class QuestionManager : MonoBehaviour
         
         // タイマーの初期化
         m_fTime = 0.0f;
+
+        // ボール状態の初期化
         m_bBallIn = true;
 
         // ジャンルの抽選
@@ -197,20 +221,14 @@ public class QuestionManager : MonoBehaviour
         List<QuestionData> list = new();
         switch (m_KindSelectButton[selectIndex].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text)
         {
-            case "セ・リーグ":
-                for (int i = 0; i < dataBase.m_QuestionDatas.Length; i++)
-                {
-                    if (dataBase.m_QuestionDatas[i].questionKind.isCentral)
-                        list.Add(dataBase.m_QuestionDatas[i]);
-                }
-                break;
-            case "パ・リーグ":
-                for (int i = 0; i < dataBase.m_QuestionDatas.Length; i++)
-                {
-                    if (dataBase.m_QuestionDatas[i].questionKind.isPacific)
-                        list.Add(dataBase.m_QuestionDatas[i]);
-                }
-                break;          
+            case "セ・リーグ": m_eQuestionKind = QuestionKind.Central; break;
+            case "パ・リーグ": m_eQuestionKind = QuestionKind.Pacific; break;          
+        }
+
+        for (int i =0; i < dataBase.m_QuestionDatas.Length; i++)
+        {
+            if (dataBase.m_QuestionDatas[i].questionKind == m_eQuestionKind)
+                list.Add(dataBase.m_QuestionDatas[i]);
         }
 
         // クイズデータの抽選
@@ -255,16 +273,10 @@ public class QuestionManager : MonoBehaviour
         // プレイヤーの設定に応じて出題する問題を制限する
         // if ()
 
-        string[] sKindName =
-        {
-            "セ・リーグ",
-            "パ・リーグ"
-        };
-
         for (int i = 0; i < 4; i++)
         {
-            int random = Random.Range(0, sKindName.Length);
-            m_KindSelectButton[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = sKindName[random];
+            int random = Random.Range(0, m_sKindName.Length);
+            m_KindSelectButton[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = m_sKindName[random];
         }
     }
 }
