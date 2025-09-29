@@ -44,7 +44,8 @@ public class QuestionManager : MonoBehaviour
     string[] m_sKindName =
     {
         "セ・リーグ",
-        "パ・リーグ"
+        "パ・リーグ",
+        "読売ジャイアンツ"
     };
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -223,9 +224,11 @@ public class QuestionManager : MonoBehaviour
         {
             case "セ・リーグ": m_eQuestionKind = QuestionKind.Central; break;
             case "パ・リーグ": m_eQuestionKind = QuestionKind.Pacific; break;          
+            case "読売ジャイアンツ": m_eQuestionKind = QuestionKind.Giants; break;
+            default: Debug.Log("ボタンが登録されていません"); break;
         }
 
-        for (int i =0; i < dataBase.m_QuestionDatas.Length; i++)
+        for (int i = 0; i < dataBase.m_QuestionDatas.Length; i++)
         {
             if (dataBase.m_QuestionDatas[i].questionKind == m_eQuestionKind)
                 list.Add(dataBase.m_QuestionDatas[i]);
