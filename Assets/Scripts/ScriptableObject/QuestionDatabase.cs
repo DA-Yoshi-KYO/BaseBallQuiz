@@ -1,17 +1,20 @@
 using System;
 using UnityEngine;
 
+
 [Serializable]
-public struct QuestionKind
+public enum QuestionKind
 {
-    public int difficult;
-    public bool isCentral;
-    public bool isPacific;
+    Central,
+    Pacific,
+
+    Max
 }
 
 [Serializable]
 public struct Question
 {
+    public int difficult;
     public string Sentence;
     public string CorrectChoice;
     public string[] InCorrectChoice;
