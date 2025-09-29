@@ -13,11 +13,9 @@ MonoBehaviour:
   m_Name: QuestionDatabase
   m_EditorClassIdentifier: 
   m_QuestionDatas:
-  - questionKind:
-      difficult: 3
-      isCentral: 1
-      isPacific: 0
+  - questionKind: 0
     question:
+      difficult: 3
       Sentence: "2025\u5E74\u306E\u30BB\u30FB\u30EA\u30FC\u30B0\u512A\u52DD\u30C1\u30FC\u30E0\u306F\uFF1F"
       CorrectChoice: "\u962A\u795E\u30BF\u30A4\u30AC\u30FC\u30B9"
       InCorrectChoice:
