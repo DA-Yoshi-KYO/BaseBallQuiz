@@ -7,6 +7,20 @@ public enum QuestionKind
 {
     Central,
     Pacific,
+    
+    Giants,
+    Tigers,
+    Dragons,
+    Swallows,
+    Carp,
+    Baystars,
+
+    Howks,
+    Lions,
+    Bufferloes,
+    Marines,
+    Fighters,
+    Eagles,
 
     Max
 }
