@@ -14,7 +14,7 @@ public class QuestionManager : MonoBehaviour
     private QuestionDatabase dataBase;  // 問題のデータベース
     private QuestionData m_QuestionData;    // 出題する問題のデータ
     private QuestionKind m_eQuestionKind;   // 出題するジャンル
-    private RectTransform[] m_QuestionInitTransforms;
+    private Vector2[] m_QuestionInitSize;
 
     private GameObject m_Sentence;  // 問題文
     private GameObject[] m_Choices = new GameObject[4]; // 選択肢
@@ -29,6 +29,8 @@ public class QuestionManager : MonoBehaviour
     [Header("問題を解く時間")]
     private float m_fLimitTime = 10.0f;
     private float m_fTime = 0.0f;
+
+    private int m_nTextCount = 0;
     
     // ゲームフェーズ
     enum GamePhase
@@ -101,14 +103,7 @@ public class QuestionManager : MonoBehaviour
         // ジャンルの抽選
         SelectKindRandomChoice();
 
-        Transform[] ChildCnt = m_Question.transform.GetComponentsInChildren<Transform>();
-        int childIndex = 0;
-        foreach (var item in ChildCnt)
-        {
-            m_QuestionInitTransforms.SetValue(item, childIndex);
-            Debug.Log(item.gameObject.name);
-            childIndex++;
-        }
+
     }
 
     // Update is called once per frame
@@ -123,6 +118,15 @@ public class QuestionManager : MonoBehaviour
                 ToQuizUpdate();
                 break;
             case GamePhase.Quiz:
+                const float nextTextTime = 0.1f;
+
+                if (m_fTime >= nextTextTime * m_nTextCount && m_nTextCount < m_QuestionData.question.Sentence.Length)
+                {
+                    // 問題文のテキスト取得
+                    m_Sentence.GetComponent<TextMeshProUGUI>().text += m_QuestionData.question.Sentence[m_nTextCount];
+                    m_nTextCount++;
+                }
+
                 if (m_fTime >= m_fLimitTime)
                 {
                     m_ePhase = GamePhase.ToKindSelect;
@@ -177,6 +181,22 @@ public class QuestionManager : MonoBehaviour
                     m_fTime = 0.0f;
                     m_eToQuizPhase = ToQuizPhase.QuestionActive;
 
+                    GameObject.Find("Choice1").GetComponent<TextMeshProUGUI>().enabled = false;
+                    GameObject.Find("Choice2").GetComponent<TextMeshProUGUI>().enabled = false;
+                    GameObject.Find("Choice3").GetComponent<TextMeshProUGUI>().enabled = false;
+                    GameObject.Find("Choice4").GetComponent<TextMeshProUGUI>().enabled = false;
+                    GameObject.Find("Sentence").GetComponent<TextMeshProUGUI>().enabled = false;
+
+                    RectTransform[] ChildCnt = m_Question.transform.GetComponentsInChildren<RectTransform>();
+                    m_QuestionInitSize = new Vector2[ChildCnt.Length];
+                    int childIndexSet = 0;
+                    foreach (var item in ChildCnt)
+                    {
+                        m_QuestionInitSize.SetValue(item.sizeDelta, childIndexSet);
+                        Debug.Log(item.gameObject.name);
+                        childIndexSet++;
+                    }
+
                     for (int i = 0; i < 4; i++)
                     {
                         m_Choices[i].GetComponent<Button>().interactable = true;
@@ -184,16 +204,28 @@ public class QuestionManager : MonoBehaviour
                 }
                 break;
             case ToQuizPhase.QuestionActive:
-                m_eToQuizPhase = ToQuizPhase.DownKindSelect;
-                m_ePhase = GamePhase.Quiz;
-                m_Question.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -390);
-
                 int childIndex = 0;
+                m_Question.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -390);
                 foreach (var itr in m_Question.transform.GetComponentsInChildren<Transform>())
                 {
-                    itr.gameObject.GetComponent<RectTransform>().sizeDelta = m_QuestionInitTransforms[childIndex].sizeDelta * Easing.EaseInBack(0);
+                    itr.gameObject.GetComponent<RectTransform>().sizeDelta = m_QuestionInitSize[childIndex]* Easing.EaseInQuint(m_fTime, EaseTime);
+                    childIndex++;
                 }
-                break;
+
+                if (m_fTime >= EaseTime)
+                {
+                    GameObject.Find("Choice1").GetComponent<TextMeshProUGUI>().enabled = true;
+                    GameObject.Find("Choice2").GetComponent<TextMeshProUGUI>().enabled = true;
+                    GameObject.Find("Choice3").GetComponent<TextMeshProUGUI>().enabled = true;
+                    GameObject.Find("Choice4").GetComponent<TextMeshProUGUI>().enabled = true;
+                    GameObject.Find("Sentence").GetComponent<TextMeshProUGUI>().enabled = true;
+
+
+                    m_fTime = 0.0f;
+                    m_eToQuizPhase = ToQuizPhase.DownKindSelect;
+                    m_ePhase = GamePhase.Quiz;
+                }
+                    break;
         };
     }
 
@@ -215,7 +247,7 @@ public class QuestionManager : MonoBehaviour
         }
 
 
-        
+        m_Sentence.GetComponent<TextMeshProUGUI>().text= m_QuestionData.question.Sentence;
         m_ePhase = GamePhase.ToKindSelect;
         m_fTime = 0.0f;
     }
@@ -246,8 +278,7 @@ public class QuestionManager : MonoBehaviour
         int QuestionIndex = Random.Range(0, list.Count);
         m_QuestionData = list[QuestionIndex];
 
-        // 問題文のテキスト取得
-        m_Sentence.GetComponent<TextMeshProUGUI>().text = m_QuestionData.question.Sentence;
+        m_Sentence.GetComponent<TextMeshProUGUI>().text = "";
 
         // 選択肢をランダムに配置
         List<int> indices = new List<int> { 0, 1, 2 };  // 不正解選択肢のインデックス
