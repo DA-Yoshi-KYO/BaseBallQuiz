@@ -14,6 +14,7 @@ public class QuestionManager : MonoBehaviour
     private QuestionDatabase dataBase;  // 問題のデータベース
     private QuestionData m_QuestionData;    // 出題する問題のデータ
     private QuestionKind m_eQuestionKind;   // 出題するジャンル
+    private RectTransform[] m_QuestionInitTransforms;
 
     private GameObject m_Sentence;  // 問題文
     private GameObject[] m_Choices = new GameObject[4]; // 選択肢
@@ -28,7 +29,6 @@ public class QuestionManager : MonoBehaviour
     [Header("問題を解く時間")]
     private float m_fLimitTime = 10.0f;
     private float m_fTime = 0.0f;
-    private bool m_bBallIn = true;
     
     // ゲームフェーズ
     enum GamePhase
@@ -39,6 +39,15 @@ public class QuestionManager : MonoBehaviour
         ToKindSelect    // ジャンル選択に移行
     };
     GamePhase m_ePhase = GamePhase.KindSelect;
+
+    // ゲームフェーズ
+    enum ToQuizPhase
+    {
+        DownKindSelect, // ジャンル選択画面を下に移動
+        ThrowBall,  // 投球
+        QuestionActive  // 問題文の表示
+    };
+    ToQuizPhase m_eToQuizPhase = ToQuizPhase.DownKindSelect;
 
     // ジャンル名
     string[] m_sKindName =
@@ -84,60 +93,34 @@ public class QuestionManager : MonoBehaviour
 
         // ジャンル選択からスタート
         m_ePhase = GamePhase.KindSelect;
-        
+        m_eToQuizPhase = ToQuizPhase.DownKindSelect;
+
         // タイマーの初期化
         m_fTime = 0.0f;
 
-        // ボール状態の初期化
-        m_bBallIn = true;
-
         // ジャンルの抽選
         SelectKindRandomChoice();
+
+        Transform[] ChildCnt = m_Question.transform.GetComponentsInChildren<Transform>();
+        int childIndex = 0;
+        foreach (var item in ChildCnt)
+        {
+            m_QuestionInitTransforms.SetValue(item, childIndex);
+            Debug.Log(item.gameObject.name);
+            childIndex++;
+        }
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        switch(m_ePhase)
+        switch (m_ePhase)
         {
             case GamePhase.KindSelect:
                 m_Timer.GetComponent<Slider>().value = 1;
                 break;
             case GamePhase.ToQuiz:
-                const float EaseTime = 1f;
-                const float MaxSize = 1800f;
-                float size = 0.0f;
-                if (m_bBallIn)
-                {
-                    size = MaxSize * Easing.EaseOutQuint(m_fTime, EaseTime);
-                    m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, m_fTime * 360);
-                    if (m_fTime >= EaseTime)
-                    {
-                        m_KindSelect.GetComponent<RectTransform>().anchoredPosition = new Vector2(1200, 0);
-                        m_Question.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -390);
-                        m_fTime = 0.0f;
-                        m_bBallIn = false;
-                    }
-                }
-                else
-                {
-                    size = MaxSize - MaxSize * Easing.EaseOutQuint(m_fTime, EaseTime);
-                    m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, (m_fTime + EaseTime) * 360);
-                    if (m_fTime >= EaseTime)
-                    {
-                        m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, 0);
-                        m_ePhase = GamePhase.Quiz;
-                        m_fTime = 0.0f;
-                        m_bBallIn = true;
-
-                        for (int i = 0; i < 4; i++)
-                        {
-                            m_Choices[i].GetComponent<Button>().interactable = true;
-                        }
-                        return;
-                    }
-                }
-                m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
+                ToQuizUpdate();
                 break;
             case GamePhase.Quiz:
                 if (m_fTime >= m_fLimitTime)
@@ -149,44 +132,69 @@ public class QuestionManager : MonoBehaviour
                 break;
 
             case GamePhase.ToKindSelect:
-                if (m_bBallIn)
-                {
-                    size = MaxSize * Easing.EaseOutQuint(m_fTime, EaseTime);
-                    m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, m_fTime * 360);
-                    if (m_fTime >= EaseTime)
-                    {
-                        m_KindSelect.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
-                        m_Question.GetComponent<RectTransform>().anchoredPosition = new Vector2(1200, -390);
-                        m_fTime = 0.0f;
-                        m_bBallIn = false;
-                    }
-                }
-                else
-                {
-                    size = MaxSize - MaxSize * Easing.EaseOutQuint(m_fTime, EaseTime);
-                    m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, (m_fTime + EaseTime) * 360);
-                    if (m_fTime >= EaseTime)
-                    {
-                        m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, 0);
-                        m_ePhase = GamePhase.KindSelect;
-                        m_fTime = 0.0f;
-                        m_bBallIn = true;
-
-                        for (int i = 0; i < 4; i++)
-                        {
-                            m_KindSelectButton[i].GetComponent<Button>().interactable = true;
-                        }
-
-                        // ジャンルの抽選
-                        SelectKindRandomChoice();
-                        return;
-                    }
-                }
-                m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
+                
                 break;
         }
 
         m_fTime += Time.deltaTime;
+    }
+    void SelectKindRandomChoice()
+    {
+        // プレイヤーの設定に応じて出題する問題を制限する
+        // if ()
+
+        for (int i = 0; i < 4; i++)
+        {
+            int random = Random.Range(0, m_sKindName.Length);
+            m_KindSelectButton[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = m_sKindName[random];
+        }
+    }
+
+    void ToQuizUpdate()
+    {
+        const float EaseTime = 1f;
+
+        switch (m_eToQuizPhase)
+        {
+            case ToQuizPhase.DownKindSelect:
+                m_KindSelect.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -800.0f * Easing.EaseInBack(m_fTime, 0.5f));
+                if (m_fTime >= EaseTime)
+                {
+                    m_fTime = 0.0f;
+                    m_eToQuizPhase = ToQuizPhase.ThrowBall;
+                }
+                break;
+            case ToQuizPhase.ThrowBall:
+                float ballX = Easing.Helmite(m_fTime, -71.0f, 0.0f, -1000.0f, 0.0f, EaseTime);
+                float ballY = Easing.Helmite(m_fTime, 277.0f, -390.0f, -1000.0f, 0.0f, EaseTime);
+                m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 100);
+                m_Ball.GetComponent<RectTransform>().anchoredPosition = new Vector2(ballX, ballY);
+                m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, -m_fTime * 720);
+                if (m_fTime >= EaseTime)
+                {
+                    m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, 0);
+                    m_Ball.GetComponent<RectTransform>().sizeDelta = Vector2.zero;
+                    m_fTime = 0.0f;
+                    m_eToQuizPhase = ToQuizPhase.QuestionActive;
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        m_Choices[i].GetComponent<Button>().interactable = true;
+                    }
+                }
+                break;
+            case ToQuizPhase.QuestionActive:
+                m_eToQuizPhase = ToQuizPhase.DownKindSelect;
+                m_ePhase = GamePhase.Quiz;
+                m_Question.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -390);
+
+                int childIndex = 0;
+                foreach (var itr in m_Question.transform.GetComponentsInChildren<Transform>())
+                {
+                    itr.gameObject.GetComponent<RectTransform>().sizeDelta = m_QuestionInitTransforms[childIndex].sizeDelta * Easing.EaseInBack(0);
+                }
+                break;
+        };
     }
 
     public void Select(int index)
@@ -271,15 +279,4 @@ public class QuestionManager : MonoBehaviour
         m_fTime = 0.0f;
     }
 
-    void SelectKindRandomChoice()
-    {
-        // プレイヤーの設定に応じて出題する問題を制限する
-        // if ()
-
-        for (int i = 0; i < 4; i++)
-        {
-            int random = Random.Range(0, m_sKindName.Length);
-            m_KindSelectButton[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = m_sKindName[random];
-        }
-    }
 }
