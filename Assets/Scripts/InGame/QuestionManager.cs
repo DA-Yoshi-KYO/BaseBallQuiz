@@ -1,6 +1,4 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Drawing;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +6,7 @@ using UnityEngine.UI;
 public class QuestionManager : MonoBehaviour
 {
     int m_nCorrectIndex = 0;    // 正解選択肢のインデックス
+    int m_nSelectIndex = 0;    // 自分が選んだ選択肢のインデックス
 
     [SerializeField]
     [Header("問題が格納されているデータベース")]
@@ -24,6 +23,8 @@ public class QuestionManager : MonoBehaviour
     private GameObject m_Question;
     private GameObject m_Ball;
     private GameObject m_Timer;
+
+    private GameObject m_SelectObject;
 
     [SerializeField]
     [Header("問題を解く時間")]
@@ -42,7 +43,6 @@ public class QuestionManager : MonoBehaviour
     };
     GamePhase m_ePhase = GamePhase.KindSelect;
 
-    // ゲームフェーズ
     enum ToQuizPhase
     {
         DownKindSelect, // ジャンル選択画面を下に移動
@@ -50,6 +50,15 @@ public class QuestionManager : MonoBehaviour
         QuestionActive  // 問題文の表示
     };
     ToQuizPhase m_eToQuizPhase = ToQuizPhase.DownKindSelect;
+
+    enum ToKindSelectPhase
+    {
+        QuestionDisActive,
+        BatMove,
+        BatSwing,
+
+    };
+    ToKindSelectPhase m_eToKindSelectPhase = ToKindSelectPhase.QuestionDisActive;
 
     // ジャンル名
     string[] m_sKindName =
@@ -96,6 +105,7 @@ public class QuestionManager : MonoBehaviour
         // ジャンル選択からスタート
         m_ePhase = GamePhase.KindSelect;
         m_eToQuizPhase = ToQuizPhase.DownKindSelect;
+        m_eToKindSelectPhase = ToKindSelectPhase.QuestionDisActive;
 
         // タイマーの初期化
         m_fTime = 0.0f;
@@ -136,7 +146,7 @@ public class QuestionManager : MonoBehaviour
                 break;
 
             case GamePhase.ToKindSelect:
-                
+                ToKindSelectUpdate();
                 break;
         }
 
@@ -149,7 +159,7 @@ public class QuestionManager : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-            int random = Random.Range(0, m_sKindName.Length);
+            int random = UnityEngine.Random.Range(0, m_sKindName.Length);
             m_KindSelectButton[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = m_sKindName[random];
         }
     }
@@ -170,7 +180,7 @@ public class QuestionManager : MonoBehaviour
                 break;
             case ToQuizPhase.ThrowBall:
                 float ballX = Easing.Helmite(m_fTime, -71.0f, 0.0f, -1000.0f, 0.0f, EaseTime);
-                float ballY = Easing.Helmite(m_fTime, 277.0f, -390.0f, -1000.0f, 0.0f, EaseTime);
+                float ballY = Easing.Helmite(m_fTime, 277.0f, -175.0f, -1000.0f, 0.0f, EaseTime);
                 m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 100);
                 m_Ball.GetComponent<RectTransform>().anchoredPosition = new Vector2(ballX, ballY);
                 m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, -m_fTime * 720);
@@ -232,9 +242,48 @@ public class QuestionManager : MonoBehaviour
         };
     }
 
+    void ToKindSelectUpdate()
+    {
+        const float EaseTime = 1f;
+
+        switch (m_eToKindSelectPhase)
+        {
+            case ToKindSelectPhase.QuestionDisActive:
+                GameObject.Find("Choice1").GetComponent<TextMeshProUGUI>().enabled = false;
+                GameObject.Find("Choice2").GetComponent<TextMeshProUGUI>().enabled = false;
+                GameObject.Find("Choice3").GetComponent<TextMeshProUGUI>().enabled = false;
+                GameObject.Find("Choice4").GetComponent<TextMeshProUGUI>().enabled = false;
+                GameObject.Find("Sentence").GetComponent<TextMeshProUGUI>().enabled = false;
+
+                int childIndex = 0;
+                foreach (var itr in m_Question.transform.GetComponentsInChildren<Transform>())
+                {
+                    if (itr.gameObject != m_SelectObject)
+                    {
+                        itr.gameObject.GetComponent<RectTransform>().sizeDelta = m_QuestionInitSize[childIndex] * (1.0f - Easing.EaseInQuint(m_fTime, EaseTime));
+                    }
+                    else
+                    {
+                        RectTransform selectTransform = itr.GetComponent<RectTransform>();
+                        selectTransform.anchoredPosition = new Vector2(0, selectTransform.anchoredPosition.y) + new Vector2(1100, 0.0f) * Easing.EaseInQuint(m_fTime, 0.5f);
+                    }
+
+                    childIndex++;
+                }
+
+                m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 100) * (Easing.EaseInQuint(m_fTime, 1.5f));
+                break;
+            case ToKindSelectPhase.BatMove:
+                break;
+            case ToKindSelectPhase.BatSwing:
+                break;
+        }
+    }
+
     public void Select(int index)
     {
-
+        m_nSelectIndex = index;
+        m_SelectObject = GameObject.Find("Button" + (m_nSelectIndex + 1).ToString());
         if (m_nCorrectIndex != index)
         {
             Debug.Log("不正解");
@@ -258,7 +307,7 @@ public class QuestionManager : MonoBehaviour
     public void SelectKind(int selectIndex)
     {
         // 正解のボタンの選択肢を決定
-        m_nCorrectIndex = Random.Range(0, 3);
+        m_nCorrectIndex = UnityEngine.Random.Range(0, 3);
         Debug.Log("正解選択肢のインデックス" + m_nCorrectIndex);
 
         // 選ばれたジャンルから抽選しうるデータを抽出
@@ -278,7 +327,7 @@ public class QuestionManager : MonoBehaviour
         }
 
         // クイズデータの抽選
-        int QuestionIndex = Random.Range(0, list.Count);
+        int QuestionIndex = UnityEngine.Random.Range(0, list.Count);
         m_QuestionData = list[QuestionIndex];
 
         m_Sentence.GetComponent<TextMeshProUGUI>().text = "";
@@ -290,7 +339,7 @@ public class QuestionManager : MonoBehaviour
             if (i != m_nCorrectIndex)
             {
                 // i == 不正解の選択肢なら不正解選択肢のインデックスからランダムに抽選しテキストを取得
-                int index = indices[Random.Range(0, indices.Count - 1)];
+                int index = indices[UnityEngine.Random.Range(0, indices.Count - 1)];
                 m_Choices[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = m_QuestionData.question.InCorrectChoice[index];
 
                 // 選ばれたインデックスは削除する
