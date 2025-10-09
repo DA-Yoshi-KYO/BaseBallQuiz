@@ -122,7 +122,7 @@ public class QuestionManager : MonoBehaviour
 
                 if (m_fTime >= nextTextTime * m_nTextCount && m_nTextCount < m_QuestionData.question.Sentence.Length)
                 {
-                    // 問題文のテキスト取得
+                    // 問題文のテキスト取得、一文字ずつ表示
                     m_Sentence.GetComponent<TextMeshProUGUI>().text += m_QuestionData.question.Sentence[m_nTextCount];
                     m_nTextCount++;
                 }
@@ -176,8 +176,7 @@ public class QuestionManager : MonoBehaviour
                 m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, -m_fTime * 720);
                 if (m_fTime >= EaseTime)
                 {
-                    m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, 0);
-                    m_Ball.GetComponent<RectTransform>().sizeDelta = Vector2.zero;
+                    
                     m_fTime = 0.0f;
                     m_eToQuizPhase = ToQuizPhase.QuestionActive;
 
@@ -206,6 +205,9 @@ public class QuestionManager : MonoBehaviour
             case ToQuizPhase.QuestionActive:
                 int childIndex = 0;
                 m_Question.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -390);
+                m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, -m_fTime * 720);
+                m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 100) * (1 - Easing.EaseInQuint(m_fTime, 0.5f));
+
                 foreach (var itr in m_Question.transform.GetComponentsInChildren<Transform>())
                 {
                     itr.gameObject.GetComponent<RectTransform>().sizeDelta = m_QuestionInitSize[childIndex]* Easing.EaseInQuint(m_fTime, EaseTime);
@@ -220,6 +222,7 @@ public class QuestionManager : MonoBehaviour
                     GameObject.Find("Choice4").GetComponent<TextMeshProUGUI>().enabled = true;
                     GameObject.Find("Sentence").GetComponent<TextMeshProUGUI>().enabled = true;
 
+                    m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, 0);
 
                     m_fTime = 0.0f;
                     m_eToQuizPhase = ToQuizPhase.DownKindSelect;
