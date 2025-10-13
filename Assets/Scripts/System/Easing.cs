@@ -11,6 +11,7 @@ public class Easing : MonoBehaviour
     /// <returns>イージングの進行度(0.0f ~ 1.0f)</returns>
     public static float Linear(float time, float timeMax = 1.0f)
     {
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -27,6 +28,7 @@ public class Easing : MonoBehaviour
     /// <returns>イージングの進行度(0.0f ~ 1.0f)</returns>
     public static float EaseInSine(float time,float timeMax = 1.0f)
     {
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f)return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -43,6 +45,7 @@ public class Easing : MonoBehaviour
     /// <returns>イージングの進行度(0.0f ~ 1.0f)</returns>
     public static float EaseInCubic(float time, float timeMax = 1.0f)
     {
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -59,6 +62,7 @@ public class Easing : MonoBehaviour
     /// <returns>イージングの進行度(0.0f ~ 1.0f)</returns>
     public static float EaseInQuint(float time, float timeMax = 1.0f)
     {
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -75,6 +79,7 @@ public class Easing : MonoBehaviour
     /// <returns>イージングの進行度(0.0f ~ 1.0f)</returns>
     public static float EaseInOutSine(float time, float timeMax = 1.0f)
     {
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -91,6 +96,7 @@ public class Easing : MonoBehaviour
     /// <returns>イージングの進行度(0.0f ~ 1.0f)</returns>
     public static float EaseInOutCubic(float time, float timeMax = 1.0f)
     {
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -107,6 +113,7 @@ public class Easing : MonoBehaviour
     /// <returns>イージングの進行度(0.0f ~ 1.0f)</returns>
     public static float EaseOutQuint(float time, float timeMax = 1.0f)
     {
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -126,6 +133,7 @@ public class Easing : MonoBehaviour
         const float c1 = 5;
         const float c3 = c1 + 1;
         
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -145,6 +153,7 @@ public class Easing : MonoBehaviour
         const float c1 = 1.70158f;
         const float c3 = c1 + 1;
 
+        if (time < 0) return 0.0f;
         if (timeMax <= 0.0f) return 0.0f;
         float t = time / timeMax;
         if (t >= 1.0f) t = 1.0f;
@@ -153,10 +162,24 @@ public class Easing : MonoBehaviour
         return outValue;
     }
 
-public static float Helmite(float time, float x0, float x1, float v0, float v1, float timeMax = 1.0f)
+    public static float Helmite(float time, float x0, float x1, float v0, float v1, float timeMax = 1.0f)
     {
+        if (time < 0) return x0;
+        if (timeMax <= 0.0f) return x0;
         float t = time / timeMax;
+        if (t >= 1.0f) t = 1.0f;
         float outValue = Mathf.Pow(t - 1, 2) * (2 * t + 1) * x0 + Mathf.Pow(t, 2) * (3 - 2 * t) * x1 + Mathf.Pow(1 - t, 2) * t * v0 + (t - 1) * Mathf.Pow(t, 2) * v1;
+
+        return outValue;
+    }
+
+    public static Vector2 Helmite(float time, Vector2 x0, Vector2 x1, Vector2 v0, Vector2 v1, float timeMax = 1.0f)
+    {
+        if (time < 0) return x0;
+        if (timeMax <= 0.0f) return x0;
+        float t = time / timeMax;
+        if (t >= 1.0f) t = 1.0f;
+        Vector2 outValue = Mathf.Pow(t - 1, 2) * (2 * t + 1) * x0 + Mathf.Pow(t, 2) * (3 - 2 * t) * x1 + Mathf.Pow(1 - t, 2) * t * v0 + (t - 1) * Mathf.Pow(t, 2) * v1;
 
         return outValue;
     }

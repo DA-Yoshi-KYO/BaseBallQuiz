@@ -22,6 +22,7 @@ public class QuestionManager : MonoBehaviour
     private GameObject m_KindSelect;
     private GameObject m_Question;
     private GameObject m_Ball;
+    private GameObject m_Bat;
     private GameObject m_Timer;
 
     private GameObject m_SelectObject;
@@ -76,6 +77,7 @@ public class QuestionManager : MonoBehaviour
         m_Question = GameObject.Find("Question");
         m_Sentence = GameObject.Find("Sentence");
         m_Ball = GameObject.Find("Ball");
+        m_Bat = GameObject.Find("Bat");
         m_Timer = GameObject.Find("Timer");
         m_Timer.GetComponent<Slider>().interactable = false;
         for (int i = 0; i < 4; i++)
@@ -179,10 +181,12 @@ public class QuestionManager : MonoBehaviour
                 }
                 break;
             case ToQuizPhase.ThrowBall:
-                float ballX = Easing.Helmite(m_fTime, -71.0f, 0.0f, -1000.0f, 0.0f, EaseTime);
-                float ballY = Easing.Helmite(m_fTime, 277.0f, -175.0f, -1000.0f, 0.0f, EaseTime);
                 m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 100);
-                m_Ball.GetComponent<RectTransform>().anchoredPosition = new Vector2(ballX, ballY);
+                m_Ball.GetComponent<RectTransform>().anchoredPosition = Easing.Helmite(
+                    m_fTime,
+                    new Vector2(-71.0f, 277.0f), new Vector2(0.0f, -175.0f),
+                    new Vector2(-1000.0f, -1000.0f), new Vector2(0.0f, 0.0f),
+                    EaseTime);
                 m_Ball.GetComponent<RectTransform>().rotation = Quaternion.Euler(0, 0, -m_fTime * 720);
                 if (m_fTime >= EaseTime)
                 {
@@ -244,7 +248,7 @@ public class QuestionManager : MonoBehaviour
 
     void ToKindSelectUpdate()
     {
-        const float EaseTime = 1f;
+        float EaseTime = 1f;
 
         switch (m_eToKindSelectPhase)
         {
@@ -254,6 +258,7 @@ public class QuestionManager : MonoBehaviour
                 GameObject.Find("Choice3").GetComponent<TextMeshProUGUI>().enabled = false;
                 GameObject.Find("Choice4").GetComponent<TextMeshProUGUI>().enabled = false;
                 GameObject.Find("Sentence").GetComponent<TextMeshProUGUI>().enabled = false;
+
 
                 int childIndex = 0;
                 foreach (var itr in m_Question.transform.GetComponentsInChildren<Transform>())
@@ -271,11 +276,46 @@ public class QuestionManager : MonoBehaviour
                     childIndex++;
                 }
 
-                m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 100) * (Easing.EaseInQuint(m_fTime, 1.5f));
+                m_Ball.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 100) * Easing.EaseInQuint(m_fTime, 1.5f);
+                if (m_fTime > 1.5f)
+                {
+                    m_eToKindSelectPhase = ToKindSelectPhase.BatMove;
+                    m_fTime = 0.0f;
+                }
                 break;
             case ToKindSelectPhase.BatMove:
+                m_Bat.GetComponent<RectTransform>().anchoredPosition = Easing.Helmite(
+                    m_fTime, 
+                    new Vector2(1200.0f, -650.0f), new Vector2(-235.0f, -81.0f),
+                    new Vector2(1000.0f, 200.0f), new Vector2(0.0f, 300.0f), 
+                    EaseTime);
+                m_Bat.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.0f);
+                m_Bat.transform.rotation = Quaternion.Euler(0, 0, m_fTime * 720.0f + 90.0f );
+
+                if (m_fTime > EaseTime)
+                {
+                    m_eToKindSelectPhase = ToKindSelectPhase.BatSwing;
+                    m_fTime = -0.5f;
+                }
                 break;
             case ToKindSelectPhase.BatSwing:
+                EaseTime = 1.0f;
+                m_Bat.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.0f);
+                m_Bat.transform.rotation = Quaternion.Euler(0, 0, Easing.Linear(m_fTime, 0.2f) * 300.0f + 90.0f);
+
+                if (m_Bat.transform.rotation.z >= 310.0f)
+                {
+                    m_Ball.GetComponent<RectTransform>().anchoredPosition = Easing.Helmite(
+                    m_fTime - 0.2f,
+                    new Vector2(0.0f, -175.0f), new Vector2(0.0f, 520.0f),
+                    new Vector2(1000.0f, -1000.0f), new Vector2(0.0f, 0.0f),
+                    EaseTime);
+                }
+                if (m_fTime > EaseTime + 0.2f)
+                {
+                    m_eToKindSelectPhase = ToKindSelectPhase.QuestionDisActive;
+                    m_fTime = 0.0f;
+                }
                 break;
         }
     }
